@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Location Based Articles</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1 id="site-title">GeoArticles</h1>
+      <nav id="main-nav">
+        <ul>
+          <li><a href="#" id="home-link">Home</a></li>
+          <li><a href="#" id="auth-link">Login/Register</a></li>
+          <li><a href="#" id="dashboard-link" class="hidden">Dashboard</a></li>
+          <li><a href="#" id="logout-link" class="hidden">Logout</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Auth Forms -->
+    <div id="auth-container" class="hidden">
+      <div class="tabs">
+        <button class="tab-btn active" id="login-tab">Login</button>
+        <button class="tab-btn" id="register-tab">Register</button>
+      </div>
+      
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" required>
+        </div>
+        <button type="submit" class="btn primary-btn">Login</button>
+      </form>
+      
+      <form id="register-form" class="hidden">
+        <div class="form-group">
+          <label for="register-username">Username</label>
+          <input type="text" id="register-username" required>
+        </div>
+        <div class="form-group">
+          <label for="register-email">Email</label>
+          <input type="email" id="register-email" required>
+        </div>
+        <div class="form-group">
+          <label for="register-password">Password</label>
+          <input type="password" id="register-password" required>
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <div class="location-controls">
+            <button type="button" id="get-location-btn" class="btn secondary-btn">
+              <i class="fas fa-map-marker-alt"></i> Get My Location
+            </button>
+            <div class="location-inputs">
+              <input type="number" id="register-latitude" placeholder="Latitude" step="0.000001">
+              <input type="number" id="register-longitude" placeholder="Longitude" step="0.000001">
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn primary-btn">Register</button>
+      </form>
+    </div>
+
+    <!-- Home Content / Articles -->
+    <div id="home-container">
+      <div class="search-controls">
+        <div class="search-bar">
+          <input type="text" id="tag-search" placeholder="Search by tags (comma separated)">
+          <button id="search-btn" class="btn primary-btn">Search</button>
+        </div>
+        
+        <div class="sort-options">
+          <label for="sort-select">Sort by:</label>
+          <select id="sort-select">
+            <option value="newest">Newest</option>
+            <option value="likes">Most Liked</option>
+            <option value="distance">Distance from me</option>
+          </select>
+        </div>
+      </div>
+      
+      <div id="articles-container" class="articles-grid"></div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard-container" class="hidden">
+      <h2>Your Dashboard</h2>
+      
+      <div class="dashboard-controls">
+        <button id="create-article-btn" class="btn primary-btn">Create New Article</button>
+        <button id="update-location-btn" class="btn secondary-btn">Update Your Location</button>
+      </div>
+      
+      <div id="location-update-form" class="hidden">
+        <h3>Update Your Location</h3>
+        <div class="location-controls">
+          <button type="button" id="dashboard-get-location-btn" class="btn secondary-btn">
+            <i class="fas fa-map-marker-alt"></i> Get My Location
+          </button>
+          <div class="location-inputs">
+            <input type="number" id="user-latitude" placeholder="Latitude" step="0.000001">
+            <input type="number" id="user-longitude" placeholder="Longitude" step="0.000001">
+          </div>
+          <button id="save-location-btn" class="btn primary-btn">Save Location</button>
+        </div>
+      </div>
+      
+      <div id="user-articles-container">
+        <h3>Your Articles</h3>
+        <div id="user-articles" class="articles-grid"></div>
+      </div>
+    </div>
+
+    <!-- Article Form -->
+    <div id="article-form-container" class="hidden">
+      <h2 id="article-form-title">Create Article</h2>
+      
+      <form id="article-form">
+        <input type="hidden" id="article-id">
+        
+        <div class="form-group">
+          <label for="article-title">Title</label>
+          <input type="text" id="article-title" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="article-content">Content</label>
+          <textarea id="article-content" rows="10" required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="article-image">Featured Image</label>
+          <input type="file" id="article-image" accept="image/*">
+        </div>
+        
+        <div class="form-group">
+          <label>Location</label>
+          <div class="location-controls">
+            <button type="button" id="article-get-location-btn" class="btn secondary-btn">
+              <i class="fas fa-map-marker-alt"></i> Use My Location
+            </button>
+            <div class="location-inputs">
+              <input type="number" id="article-latitude" placeholder="Latitude" step="0.000001" required>
+              <input type="number" id="article-longitude" placeholder="Longitude" step="0.000001" required>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="article-tags">Tags (comma separated)</label>
+          <input type="text" id="article-tags" placeholder="news, travel, food, etc.">
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" id="cancel-article-btn" class="btn secondary-btn">Cancel</button>
+          <button type="submit" class="btn primary-btn">Save Article</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Article Detail View -->
+    <div id="article-detail-container" class="hidden">
+      <div id="article-detail-content"></div>
+      <button id="back-to-articles" class="btn secondary-btn">Back to Articles</button>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2023 GeoArticles - Location-based Article Platform</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

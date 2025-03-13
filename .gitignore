@@ -131,3 +131,25 @@ dist
 
 # Replit debugger
 .breakpoints
+# Dependencies
+node_modules/
+package-lock.json
+
+# Database
+*.sqlite
+*.sqlite-journal
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+
+# Upload directory
+public/uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
