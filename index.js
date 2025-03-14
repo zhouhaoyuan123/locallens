@@ -350,8 +350,8 @@ app.get('/api/articles', (req, res) => {
     
     if (radius) {
       const radiusValue = unit === 'mi' ? parseFloat(radius) * 1.60934 : parseFloat(radius);
-      query += ` HAVING ${distanceCalc} <= ?`;
-      params.push(latitude, longitude, latitude, radiusValue);
+      query += ` HAVING ${distanceCalc} <= ${radiusValue}`;
+      params.push(latitude, longitude, latitude);
     }
   } else {
     query += ' ORDER BY a.created_at DESC';

@@ -927,6 +927,21 @@ function setupEventListeners() {
   elements.sortSelect.addEventListener('change', () => {
     loadArticles();
   });
+
+  // Radius Controls
+  document.getElementById('apply-radius').addEventListener('click', () => {
+    const radiusInput = document.getElementById('radius-filter');
+    if (!radiusInput.value || isNaN(parseFloat(radiusInput.value))) {
+      alert('Please enter a valid radius value');
+      return;
+    }
+    loadArticles();
+  });
+
+  document.getElementById('reset-radius').addEventListener('click', () => {
+    document.getElementById('radius-filter').value = '';
+    loadArticles();
+  });
   
   elements.tagSearch.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
