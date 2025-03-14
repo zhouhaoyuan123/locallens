@@ -447,22 +447,34 @@ app.put('/api/articles/:id', isAuthenticated, upload.single('image'), (req, res)
               // Add new tags
               const tagList = Array.isArray(tags) ? tags : tags.split(',').map(tag => tag.trim());
               
-              const insertTag = db.prepare('INSERT OR IGNORE INTO tags (name) VALUES (?)');
-              const linkArticleTag = db.prepare('INSERT INTO article_tags (article_id, tag_id) VALUES (?, ?)');
+              const insertTagStmt = db.prepare('INSERT OR IGNORE INTO tags (name) VALUES (?)');
+              const linkArticleTagStmt = db.prepare('INSERT INTO article_tags (article_id, tag_id) VALUES (?, ?)');
               
-              tagList.forEach(tagName => {
-                insertTag.run(tagName, function() {
-                  // Get the tag id (either newly inserted or existing)
-                  db.get('SELECT id FROM tags WHERE name = ?', [tagName], (err, tag) => {
-                    if (tag) {
-                      linkArticleTag.run(id, tag.id);
-                    }
+              const processTag = (tagName) => {
+                return new Promise((resolve, reject) => {
+                  insertTagStmt.run(tagName, function(err) {
+                    if (err) return reject(err);
+                    db.get('SELECT id FROM tags WHERE name = ?', [tagName], (err, tag) => {
+                      if (err) return reject(err);
+                      if (tag) {
+                        linkArticleTagStmt.run(id, tag.id, (err) => {
+                          if (err) return reject(err);
+                          resolve();
+                        });
+                      } else {
+                        resolve();
+                      }
+                    });
                   });
                 });
-              });
-              
-              insertTag.finalize();
-              linkArticleTag.finalize();
+              };
+
+              Promise.all(tagList.map(processTag))
+                .then(() => {
+                  insertTagStmt.finalize();
+                  linkArticleTagStmt.finalize();
+                })
+                .catch(err => console.error('Error processing tags:', err));
             }
             
             res.json({ 
