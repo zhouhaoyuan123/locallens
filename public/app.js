@@ -751,33 +751,18 @@ function setupEventListeners() {
     const username = document.getElementById('register-username').value;
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
-    const latitude = document.getElementById('register-latitude').value || null;
-    const longitude = document.getElementById('register-longitude').value || null;
     
     try {
       const user = await api.register({ 
         username, 
         email, 
-        password, 
-        latitude, 
-        longitude 
+        password
       });
       
       state.user = user;
       ui.updateNavigation();
       ui.showPage('home');
       loadArticles();
-    } catch (error) {
-      alert(error.message);
-    }
-  });
-  
-  // Get Location Buttons
-  elements.getLocationBtn.addEventListener('click', async () => {
-    try {
-      const location = await getCurrentLocation();
-      document.getElementById('register-latitude').value = location.latitude;
-      document.getElementById('register-longitude').value = location.longitude;
     } catch (error) {
       alert(error.message);
     }

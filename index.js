@@ -120,15 +120,15 @@ const isAuthenticated = (req, res, next) => {
 // Auth routes
 app.post('/api/register', async (req, res) => {
   try {
-    const { username, email, password, latitude, longitude } = req.body;
+    const { username, email, password } = req.body;
     
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     
     // Insert user into database
     db.run(
-      'INSERT INTO users (username, email, password, latitude, longitude) VALUES (?, ?, ?, ?, ?)',
-      [username, email, hashedPassword, latitude || null, longitude || null],
+      'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+      [username, email, hashedPassword],
       function(err) {
         if (err) {
           if (err.message.includes('UNIQUE constraint failed')) {
@@ -142,9 +142,7 @@ app.post('/api/register', async (req, res) => {
         res.status(201).json({ 
           id: this.lastID, 
           username, 
-          email, 
-          latitude, 
-          longitude 
+          email
         });
       }
     );
