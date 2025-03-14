@@ -274,7 +274,7 @@ app.post('/api/articles', isAuthenticated, upload.single('image'), (req, res) =>
 });
 
 app.get('/api/articles', (req, res) => {
-  const { sort, tags, latitude, longitude, userId } = req.query;
+  const { sort, tags, latitude, longitude, userId, radius, unit } = req.query;
   
   let query = `
     SELECT a.*, u.username as author, COUNT(l.user_id) as like_count,
@@ -321,17 +321,23 @@ app.get('/api/articles', (req, res) => {
     query += ' ORDER BY a.created_at DESC';
   } else if (sort === 'distance' && latitude && longitude) {
     // Calculate distance using Haversine formula
-    query += `
-      ORDER BY (
-        6371 * acos(
-          cos(radians(?)) * 
-          cos(radians(a.latitude)) * 
-          cos(radians(a.longitude) - radians(?)) + 
-          sin(radians(?)) * 
-          sin(radians(a.latitude))
-        )
+    const distanceCalc = `(
+      6371 * acos(
+        cos(radians(?)) * 
+        cos(radians(a.latitude)) * 
+        cos(radians(a.longitude) - radians(?)) + 
+        sin(radians(?)) * 
+        sin(radians(a.latitude))
       )
-    `;
+    )`;
+    
+    if (radius) {
+      const radiusValue = unit === 'mi' ? parseFloat(radius) * 1.60934 : parseFloat(radius);
+      whereConditions.push(`${distanceCalc} <= ?`);
+      params.push(latitude, longitude, latitude, radiusValue);
+    }
+    
+    query += ` ORDER BY ${distanceCalc}`;
     params.push(latitude, longitude, latitude);
   } else {
     query += ' ORDER BY a.created_at DESC';

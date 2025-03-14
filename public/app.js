@@ -608,6 +608,14 @@ async function loadArticles() {
       params.sort = sortValue;
     }
     
+    // Get radius filter if set
+    const radiusValue = document.getElementById('radius-filter').value;
+    const radiusUnit = document.getElementById('radius-unit').value;
+    if (radiusValue) {
+      params.radius = radiusValue;
+      params.unit = radiusUnit;
+    }
+    
     // Get tags if any
     const tagsValue = elements.tagSearch.value.trim();
     if (tagsValue) {

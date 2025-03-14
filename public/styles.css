@@ -1,4 +1,3 @@
-
 /* Global Styles */
 :root {
   --primary-color: #4a89dc;
@@ -206,9 +205,24 @@ select {
 }
 
 .search-bar {
-  display: flex;
   flex: 1;
-  min-width: 300px;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.location-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.location-filter input[type="number"] {
+  width: 100px;
+}
+
+.location-filter select {
+  width: auto;
 }
 
 .search-bar input {
@@ -433,12 +447,12 @@ footer {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .article-detail-meta {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .dashboard-controls {
     flex-direction: column;
   }
