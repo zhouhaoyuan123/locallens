@@ -240,22 +240,36 @@ app.post('/api/articles', isAuthenticated, upload.single('image'), (req, res) =>
         if (tags && tags.length > 0) {
           const tagList = Array.isArray(tags) ? tags : tags.split(',').map(tag => tag.trim());
           
-          const insertTag = db.prepare('INSERT OR IGNORE INTO tags (name) VALUES (?)');
-          const linkArticleTag = db.prepare('INSERT INTO article_tags (article_id, tag_id) VALUES (?, ?)');
-          
-          tagList.forEach(tagName => {
-            insertTag.run(tagName, function() {
-              // Get the tag id (either newly inserted or existing)
-              db.get('SELECT id FROM tags WHERE name = ?', [tagName], (err, tag) => {
-                if (tag) {
-                  linkArticleTag.run(articleId, tag.id);
-                }
+          const processTagsSequentially = async (tagList) => {
+            const insertTag = db.prepare('INSERT OR IGNORE INTO tags (name) VALUES (?)');
+            const linkArticleTag = db.prepare('INSERT INTO article_tags (article_id, tag_id) VALUES (?, ?)');
+            
+            for (const tagName of tagList) {
+              await new Promise((resolve, reject) => {
+                insertTag.run(tagName, function(err) {
+                  if (err) return reject(err);
+                  db.get('SELECT id FROM tags WHERE name = ?', [tagName], (err, tag) => {
+                    if (err) return reject(err);
+                    if (tag) {
+                      linkArticleTag.run(articleId, tag.id, (err) => {
+                        if (err) return reject(err);
+                        resolve();
+                      });
+                    } else {
+                      resolve();
+                    }
+                  });
+                });
               });
-            });
-          });
+            }
+            
+            insertTag.finalize();
+            linkArticleTag.finalize();
+          };
           
-          insertTag.finalize();
-          linkArticleTag.finalize();
+          processTagsSequentially(tagList).catch(err => {
+            console.error('Error processing tags:', err);
+          });
         }
         
         res.status(201).json({ 
@@ -331,14 +345,14 @@ app.get('/api/articles', (req, res) => {
       )
     )`;
     
-    if (radius) {
-      const radiusValue = unit === 'mi' ? parseFloat(radius) * 1.60934 : parseFloat(radius);
-      whereConditions.push(`${distanceCalc} <= ?`);
-      params.push(latitude, longitude, latitude, radiusValue);
-    }
-    
     query += ` ORDER BY ${distanceCalc}`;
     params.push(latitude, longitude, latitude);
+    
+    if (radius) {
+      const radiusValue = unit === 'mi' ? parseFloat(radius) * 1.60934 : parseFloat(radius);
+      query += ` HAVING ${distanceCalc} <= ?`;
+      params.push(latitude, longitude, latitude, radiusValue);
+    }
   } else {
     query += ' ORDER BY a.created_at DESC';
   }
