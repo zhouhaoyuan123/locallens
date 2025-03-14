@@ -289,7 +289,7 @@ app.post('/api/articles', isAuthenticated, upload.single('image'), (req, res) =>
 
 app.get('/api/articles', (req, res) => {
   const { sort, tags, latitude, longitude, userId, radius, unit } = req.query;
-  
+
   let query = `
     SELECT a.*, u.username as author, COUNT(l.user_id) as like_count,
     GROUP_CONCAT(t.name) as tags
@@ -299,10 +299,10 @@ app.get('/api/articles', (req, res) => {
     LEFT JOIN article_tags at ON a.id = at.article_id
     LEFT JOIN tags t ON at.tag_id = t.id
   `;
-  
+
   let whereConditions = [];
   let params = [];
-  
+
   // Filter by tags
   if (tags) {
     const tagArray = tags.split(',');
@@ -315,59 +315,57 @@ app.get('/api/articles', (req, res) => {
     )`);
     params = [...params, ...tagArray, tagArray.length];
   }
-  
+
   // Filter by user
   if (userId) {
     whereConditions.push('a.user_id = ?');
     params.push(userId);
   }
-  
+
+  // Apply location filtering and radius
+  if (latitude && longitude && radius) {
+    const radiusValue = unit === 'mi' ? parseFloat(radius) * 1.60934 : parseFloat(radius);
+    const distanceCalc = `(
+      6371 * acos(
+        cos(radians(?)) *
+        cos(radians(a.latitude)) *
+        cos(radians(a.longitude) - radians(?)) +
+        sin(radians(?)) *
+        sin(radians(a.latitude))
+      )
+    )`;
+    whereConditions.push(`${distanceCalc} <= ?`);
+    params.push(latitude, longitude, latitude, radiusValue);
+  }
+
   if (whereConditions.length > 0) {
     query += ` WHERE ${whereConditions.join(' AND ')}`;
   }
-  
+
   query += ' GROUP BY a.id';
-  
+
   // Apply sorting
   if (sort === 'likes') {
     query += ' ORDER BY like_count DESC';
   } else if (sort === 'newest') {
     query += ' ORDER BY a.created_at DESC';
-  } else if (sort === 'distance' && latitude && longitude) {
-    // Calculate distance using Haversine formula
-    const distanceCalc = `(
-      6371 * acos(
-        cos(radians(?)) * 
-        cos(radians(a.latitude)) * 
-        cos(radians(a.longitude) - radians(?)) + 
-        sin(radians(?)) * 
-        sin(radians(a.latitude))
-      )
-    )`;
-    
+  } else if (sort === 'distance') {
     query += ` ORDER BY ${distanceCalc}`;
-    params.push(latitude, longitude, latitude);
-    
-    if (radius) {
-      const radiusValue = unit === 'mi' ? parseFloat(radius) * 1.60934 : parseFloat(radius);
-      query += ` HAVING ${distanceCalc} <= ${radiusValue}`;
-      params.push(latitude, longitude, latitude);
-    }
   } else {
     query += ' ORDER BY a.created_at DESC';
   }
-  
+
   db.all(query, params, (err, articles) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    
+
     // Process the results to format tags as arrays
     const formattedArticles = articles.map(article => ({
       ...article,
       tags: article.tags ? article.tags.split(',') : []
     }));
-    
+
     res.json(formattedArticles);
   });
 });
