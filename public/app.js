@@ -931,10 +931,19 @@ function setupEventListeners() {
   // Radius Controls
   document.getElementById('apply-radius').addEventListener('click', () => {
     const radiusInput = document.getElementById('radius-filter');
+    const globalLat = document.getElementById('global-latitude').value;
+    const globalLong = document.getElementById('global-longitude').value;
+    
     if (!radiusInput.value || isNaN(parseFloat(radiusInput.value))) {
       alert('Please enter a valid radius value');
       return;
     }
+    
+    if (!globalLat || !globalLong) {
+      alert('Please set your location first to use the radius filter');
+      return;
+    }
+    
     loadArticles();
   });
 
