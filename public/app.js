@@ -622,10 +622,18 @@ async function loadArticles() {
       params.tags = tagsValue;
     }
     
-    // Add user location if sorting by distance
-    if (sortValue === 'distance' && state.user && state.user.latitude && state.user.longitude) {
-      params.latitude = state.user.latitude;
-      params.longitude = state.user.longitude;
+    // Add location if sorting by distance
+    if (sortValue === 'distance') {
+      const globalLat = document.getElementById('global-latitude').value;
+      const globalLong = document.getElementById('global-longitude').value;
+      
+      if (globalLat && globalLong) {
+        params.latitude = globalLat;
+        params.longitude = globalLong;
+      } else if (state.user && state.user.latitude && state.user.longitude) {
+        params.latitude = state.user.latitude;
+        params.longitude = state.user.longitude;
+      }
     }
     
     const articles = await api.getArticles(params);
@@ -895,6 +903,22 @@ function setupEventListeners() {
     ui.showPage('home');
   });
   
+  // Global Location Detection
+  document.getElementById('detect-location-btn').addEventListener('click', async () => {
+    try {
+      const location = await getCurrentLocation();
+      document.getElementById('global-latitude').value = location.latitude;
+      document.getElementById('global-longitude').value = location.longitude;
+      loadArticles();
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+
+  // Update articles when global location changes
+  document.getElementById('global-latitude').addEventListener('change', loadArticles);
+  document.getElementById('global-longitude').addEventListener('change', loadArticles);
+
   // Search and Sort
   elements.searchBtn.addEventListener('click', () => {
     loadArticles();

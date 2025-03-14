@@ -237,6 +237,22 @@ select {
   border-bottom-left-radius: 0;
 }
 
+.global-location-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.global-location-controls .location-inputs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.global-location-controls input {
+  width: 140px;
+}
+
 .articles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -283,6 +299,12 @@ select {
 .article-excerpt {
   margin-bottom: 1rem;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 4.5em;
 }
 
 .article-tags {
